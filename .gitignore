@@ -2,3 +2,4 @@ Scrape pages.ipynb
 .ipynb_checkpoints/
 *.pickle
 pylint.ipynb
+__pycache__/

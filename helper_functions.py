@@ -1,8 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-
-url_list = pd.read_csv('url_list.csv')['url'].tolist()
+from collections import Counter
 
 
 def extract_urls(x):
@@ -48,10 +47,44 @@ def process_url_to_data(x):
     title = title_raw.replace("-", " ").title()
     book_url = x + '/downloads/' + x.replace('/ebooks/', '').replace(
         '/', '_') + '.azw3'
-
+    search_string = ' '.join([title, last_name, first_plus])
     return {
         'title': title,
         'author_last': last_name,
         'author_first': first_plus,
-        'book_url': book_url
+        'title_HREF': f"https://standardebooks.org{book_url}",
+        'search_block': search_string
     }
+
+
+class ebookData():
+    def __init__(self) -> None:
+        url_list = pd.read_csv('url_list.csv')['url'].tolist()
+        self.df = pd.DataFrame([process_url_to_data(x) for x in url_list])
+
+    @staticmethod
+    def search_score(clean_text, search):
+        """Not so great method stolen from another project"""
+        word_list = [
+            x for x in clean_text.lower().split(' ') if x not in [
+                'the', 'and', 'if', 'with', 'of', 'no', 'is', 'by', 'from',
+                'other', 'than'
+            ]
+        ]
+        counter_dict = {
+            key: val
+            for key, val in Counter(word_list).most_common() if key
+        }
+        search_terms = search.lower().split()
+        return sum([counter_dict.get(x, -2) for x in search_terms])
+
+    def search(self, search):
+        search = search.lower()
+        return_cols = ['title', 'author_last', 'author_first','title_HREF']
+        df = self.df.copy()
+        if not search:
+            return pd.DataFrame(columns=return_cols)
+        df['search_score'] = df['search_block'].apply(self.search_score,
+                                                      args=(search, ))
+        return df.query('search_score > 0').sort_values(
+            'search_score', ascending=False)[return_cols]
