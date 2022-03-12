@@ -9,6 +9,7 @@ app = Dash(__name__,
            external_stylesheets=[dbc.themes.YETI],
            url_base_pathname='/ebook_search/')
 
+server = app.server
 app.layout = dbc.Container([
     html.H2("Standard eBooks AZW3 search"),
     html.Div([
