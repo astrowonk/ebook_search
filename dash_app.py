@@ -5,7 +5,9 @@ from helper_functions import ebookData
 
 ebooks = ebookData()
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.YETI])
+app = Dash(__name__,
+           external_stylesheets=[dbc.themes.YETI],
+           url_base_pathname='/ebook_search/')
 
 app.layout = dbc.Container([
     html.H2("Standard eBooks AZW3 search"),
@@ -14,10 +16,13 @@ app.layout = dbc.Container([
         dbc.Input(id='my-input',
                   placeholder='Search title or author...',
                   value='',
-                  type='text',debounce=500)
+                  type='text',
+                  debounce=500)
     ]),
     html.Br(),
-    dcc.Markdown("Title links should directly download Kindle compatible .azw3 file, ideal for loading from the Kindle broswer directly."),
+    dcc.Markdown(
+        "Title links should directly download Kindle compatible .azw3 file, ideal for loading from the Kindle broswer directly."
+    ),
     html.Div(id='my-output'),
 ])
 
